@@ -1,98 +1,185 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { client, DATABASE_ID, databases, EXERCISE_TABLE_ID, RealtimeResponse, } from "@/lib/appwrite";
+import { useAuth } from "@/lib/auth-context";
+import { Exercise } from "@/types/database.types";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MutableRefObject, useEffect, useRef, useState } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { Query } from "react-native-appwrite";
+import Swipeable, { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { Button, Surface, Text } from "react-native-paper";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+export default function Index() {
+  const {signOut, user} = useAuth();
+  const [exercises, setExercises] = useState<Exercise[]>();
 
-export default function HomeScreen() {
+  const swipeableRefs = useRef<Record<string, MutableRefObject<SwipeableMethods | null>>>({} as Record<string, MutableRefObject<SwipeableMethods | null>>);
+
+  useEffect(() => {
+
+    if (user) {
+      const channel = `databases.${DATABASE_ID}.tables.${EXERCISE_TABLE_ID}.rows`
+      const habitsSubscription = client.subscribe(
+        channel,
+        (response: RealtimeResponse) => {
+          console.log('Received subscription event:', response);
+          if (response.events.includes("databases.*.tables.*.rows.*.create")) {
+            fetchExercises();
+          } else if (response.events.includes("databases.*.tables.*.rows.*.update")) {
+            fetchExercises();
+          } else if (response.events.includes("databases.*.tables.*.rows.*.delete")) {
+            fetchExercises();
+          }
+        }
+      );
+
+      fetchExercises();
+
+      return () => {
+        habitsSubscription();
+      }
+    }
+  }, [user]);
+
+
+  const fetchExercises = async () => {
+    try {
+      const response = await databases.listRows(
+        {
+          databaseId: DATABASE_ID,
+          tableId: EXERCISE_TABLE_ID,
+          queries: [Query.equal("userId", user?.$id ?? "")]
+        }
+      )
+      setExercises(response.rows as unknown as Exercise[])
+      console.log(response);
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const handleDeleteHabit = async (id: string) => {
+    try {
+      await databases.deleteRow({
+        databaseId: DATABASE_ID,
+        tableId: EXERCISE_TABLE_ID,
+        rowId: id
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  const renderLeftActions = () => (
+    <View style={styles.swipeActionLeft}>
+      <MaterialCommunityIcons name="delete" size={32} color="white" />
+    </View>
+  )
+
+  const renderRightActions = () => (
+    <View style={styles.swipeActionRight}>
+      <MaterialCommunityIcons name="pencil" size={32} color="white" />
+    </View>
+  )
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <View>
+        <Text variant="headlineSmall">Exercises</Text>
+        <Button mode="text" onPress={signOut} icon={"logout"}>Sign Out</Button>
+      </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {exercises?.length !== 0 ? (
+          exercises?.map((exercise, key) => {
+            if (!swipeableRefs.current[exercise.$id]) {
+              swipeableRefs.current[exercise.$id] = { current: null };
+            }
+            const refObject = swipeableRefs.current[exercise.$id];
+            return (
+              <Swipeable
+                key={exercise.$id}
+                ref={refObject}
+                overshootLeft={false}
+                overshootRight={false}
+                renderLeftActions={renderLeftActions}
+                renderRightActions={renderRightActions}
+                onSwipeableOpen={(direction) => {
+                  if (direction === 'left') {
+                    handleDeleteHabit(exercise.$id);
+                  } else if (direction === 'right') {
+                    // Handle edit action
+                  }
+                  swipeableRefs.current[exercise.$id].current?.close();
+                }}
+              >
+                <Surface style={styles.card} elevation={0}>
+                  <View style={styles.cardContent}>
+                    <Text>{exercise.name}</Text>
+                  </View>
+                </Surface>
+              </Swipeable>
+            );
+          })
+        ) : (
+          <Text>No exercises found. Add one!</Text>
+        ) }
+      </ScrollView>
+
+
+
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  navButton: {
+    width: 100,
+    height: 40,
+    backgroundColor: "coral",
+    borderRadius: 8,
+    textAlign: "center",
+    textAlignVertical: "center"
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  card: {
+    marginBottom: 18,
+    borderRadius: 18,
+    backgroundColor: "#f7f2f8",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  cardContent: {
+    padding: 20
   },
-});
+  swipeActionLeft: {
+    justifyContent: 'center',
+    alignItems: "flex-start",
+    flex: 1,
+    backgroundColor: '#e53935',
+    borderRadius: 18,
+    marginBottom: 18,
+    marginTop: 2,
+    paddingLeft: 16,
+  },
+  swipeActionRight: {
+    justifyContent: 'center',
+    alignItems: "flex-end",
+    flex: 1,
+    backgroundColor: '#4caf50',
+    borderRadius: 18,
+    marginBottom: 18,
+    marginTop: 2,
+    paddingRight: 16,
+  }
+})
