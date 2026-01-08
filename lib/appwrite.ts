@@ -7,7 +7,7 @@ export const client = new Client()
 
 export const account = new Account(client)
 
-export const databases = new TablesDB(client)
+export const appwriteDb = new TablesDB(client)
 
 export const DATABASE_ID = process.env.EXPO_PUBLIC_DB_ID!
 export const EXERCISE_TABLE_ID = process.env.EXPO_PUBLIC_EXERCISE_TABLE_ID!

@@ -1,8 +1,185 @@
-import { Models } from "react-native-appwrite"
+import { Models } from "react-native-appwrite";
 
-export interface Exercise extends Models.Document {
-    userId: string;
-    name: string;
-    notes: string;
+/* =========================
+  ENUMS
+  ========================= */
 
+export enum SyncStatus {
+  Pending = "pending",
+  Synced = "synced",
+  Conflict = "conflict",
+  Deleted = "deleted",
+}
+
+export enum SetType {
+  Normal = "Normal",
+  WarmUp = "WarmUp",
+  Drop = "Drop",
+  Failure = "Failure",
+}
+
+export enum ExerciseType {
+  WeightReps = "WeightReps",
+  Bodyweight = "Bodyweight",
+  Duration = "Duration",
+  Distance = "Distance",
+  Other = "Other",
+}
+
+export enum ExerciseUnit {
+  Pounds = "Pounds",
+  Kilograms = "Kilograms",
+  Other = "Other",
+}
+
+export enum MuscleGroup {
+  Arms = "Arms",
+  Back = "Back",
+  Cardio = "Cardio",
+  Chest = "Chest",
+  Core = "Core",
+  FullBody = "FullBody",
+  Legs = "Legs",
+  Shoulders = "Shoulders",
+  Other = "Other",
+}
+
+export enum Equipment {
+  Barbell = "Barbell",
+  Bodyweight = "Bodyweight",
+  Dumbbell = "Dumbbell",
+  Kettlebell = "Kettlebell",
+  Machine = "Machine",
+  Plates = "Plates",
+  ResistanceBands = "ResistanceBands",
+  Other = "Other",
+}
+
+/* =========================
+  USER PROFILE (App Data)
+  ========================= */
+
+export interface UserProfile extends Models.Document {
+  userId: string;
+
+  firstName: string;
+  lastName: string;
+  dateOfBirth?: string;
+
+  createdAt: string;
+  updatedAt: string;
+}
+
+/* =========================
+  PROGRAM & WORKOUT TEMPLATES
+  ========================= */
+
+export interface Program extends Models.Document {
+  name: string;
+  description?: string;
+
+  userId: string;
+
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Workout extends Models.Document {
+  name: string;
+  order: number;
+  scheduledDays: number[]; // 0 (Sun) - 6 (Sat)
+
+  programId: string;
+
+  version: number;
+  syncStatus: SyncStatus;
+
+  createdAt: string;
+  updatedAt: string;
+}
+
+/* =========================
+  EXERCISE LIBRARY
+  ========================= */
+
+export interface ExerciseDefinition extends Models.Document {
+  name: string;
+  description?: string;
+  photoUrl?: string;
+  isPublic: boolean;
+
+  type: ExerciseType;
+  muscleGroups: MuscleGroup[];
+  equipment: Equipment;
+
+  createdAt: string;
+  updatedAt: string;
+}
+
+/* =========================
+  WORKOUT STRUCTURE
+  ========================= */
+
+export interface WorkoutExercise extends Models.Document {
+  order: number;
+
+  minSets: number;
+  maxSets: number;
+
+  minReps?: number;
+  maxReps?: number;
+
+  minRest?: number;
+  maxRest?: number;
+
+  workoutId: string;
+  exerciseDefinitionId: string;
+
+  createdAt: string;
+  updatedAt: string;
+}
+
+/* =========================
+  WORKOUT EXECUTION
+  ========================= */
+
+export interface WorkoutSession extends Models.Document {
+  workoutId: string;
+  userId: string;
+
+  startedAt: string;
+  completedAt?: string;
+
+  version: number;
+  syncStatus: SyncStatus;
+
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CompletedExercise extends Models.Document {
+  order: number;
+
+  workoutSessionId: string;
+  exerciseDefinitionId: string;
+
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LoggedSet extends Models.Document {
+  setNumber: number;
+
+  reps?: number;
+  weight?: number;
+  duration?: number;
+  distance?: number;
+
+  unit?: ExerciseUnit;
+  type: SetType;
+
+  completedExerciseId: string;
+
+  createdAt: string;
+  updatedAt: string;
 }

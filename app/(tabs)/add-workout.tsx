@@ -1,11 +1,9 @@
-import { DATABASE_ID, databases, EXERCISE_TABLE_ID } from '@/lib/appwrite';
 import { useAuth } from '@/lib/auth-context';
+import { createWorkout } from '@/lib/workoutRepository';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { View } from 'react-native';
-import { ID } from 'react-native-appwrite';
-
-import { Button, SegmentedButtons, TextInput, useTheme, Text } from 'react-native-paper';
+import { Button, SegmentedButtons, Text, TextInput, useTheme } from 'react-native-paper';
 
 const INTENSITIES = ["easy", "medium", "hard"];
 type Intensity = (typeof INTENSITIES)[number];
@@ -24,17 +22,11 @@ export default function AddWorkoutScreen() {
       if (!user) return;
 
       try {
-        await databases.createRow({
-          databaseId: DATABASE_ID,
-          tableId: EXERCISE_TABLE_ID,
-          rowId: ID.unique(),
-          data: {
-            userId: user.$id,
-            name: name,
-            notes: notes,
-            lastCompleted: new Date().toISOString()
-          }
-        })
+        await createWorkout({
+          userId: user.$id,
+          name,
+          notes,
+        });
 
         router.back();
       } catch (error) {
