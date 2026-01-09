@@ -73,9 +73,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
     } catch (error) {
       console.log(error);
     }
-
   }
-
 
   return (
     <AuthContext.Provider value={{user, isLoadingUser, signUp, signIn, signOut}}>

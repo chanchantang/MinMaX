@@ -1,34 +1,34 @@
-import { eq } from "drizzle-orm";
-import { db } from "../db/database";
-import { workouts } from "../db/schema";
-import { SyncStatus } from "../domain/enum";
+// import { eq } from "drizzle-orm";
+// import { db } from "../db/database";
+// import { workouts } from "../db/schema";
+// import { SyncStatus } from "../domain/enum";
 
-export async function pushPendingWorkouts() {
-  const pending = await db
-    .select()
-    .from(workouts)
-    .where(eq(workouts.syncStatus, SyncStatus.Pending));
+// export async function pushPendingWorkouts() {
+//   const pending = await db
+//     .select()
+//     .from(workouts)
+//     .where(eq(workouts.syncStatus, SyncStatus.Pending));
 
-  for (const workout of pending) {
-    try {
-    //   // 1️⃣ Push to Appwrite
-    //   await appwrite.databases.createDocument(
-    //     "db",
-    //     "workouts",
-    //     workout.id,
-    //     {
-    //       ...workout,
-    //       scheduledDays: JSON.parse(workout.scheduledDays),
-    //     }
-    //   );
+//   for (const workout of pending) {
+//     try {
+//     //   // 1️⃣ Push to Appwrite
+//     //   await appwrite.databases.createDocument(
+//     //     "db",
+//     //     "workouts",
+//     //     workout.id,
+//     //     {
+//     //       ...workout,
+//     //       scheduledDays: JSON.parse(workout.scheduledDays),
+//     //     }
+//     //   );
 
-      // 2️⃣ Mark as synced
-      await db
-        .update(workouts)
-        .set({ syncStatus: SyncStatus.Synced })
-        .where(eq(workouts.id, workout.id));
-    } catch (e) {
-      // leave as pending
-    }
-  }
-}
+//       // 2️⃣ Mark as synced
+//       await db
+//         .update(workouts)
+//         .set({ syncStatus: SyncStatus.Synced })
+//         .where(eq(workouts.id, workout.id));
+//     } catch (e) {
+//       // leave as pending
+//     }
+//   }
+// }
