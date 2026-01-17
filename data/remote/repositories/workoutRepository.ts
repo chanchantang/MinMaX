@@ -1,11 +1,11 @@
 import { ID } from "react-native-appwrite";
-import { SyncStatus } from "../domain/enum";
-import { Workout } from "../types/database.types";
+import { SyncStatus } from "../../../domain/enum";
 import {
   appwriteDb,
   DATABASE_ID,
   WORKOUT_TABLE_ID,
-} from "./appwrite";
+} from "../client";
+import { Workout } from "../types";
 
 /* =========================
    CREATE

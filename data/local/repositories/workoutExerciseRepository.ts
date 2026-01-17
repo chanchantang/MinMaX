@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid/non-secure";
-import { getDb } from "../db-client";
+import { getDb } from "../client";
 import { workoutExercises } from "../schema";
 
 /* =========================

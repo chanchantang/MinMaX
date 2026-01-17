@@ -32,3 +32,12 @@
 //     }
 //   }
 // }
+
+
+// if (local.version > remote.version) {
+//   pushLocal();
+// } else if (remote.version > local.version) {
+//   pullRemote();
+// } else {
+//   markSynced();
+// }

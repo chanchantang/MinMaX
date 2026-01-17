@@ -1,15 +1,14 @@
-import { DbProvider } from "@/db/db-context";
-import * as schema from "@/db/schema";
-import { AuthProvider, useAuth } from "@/lib/auth-context";
+import { DbProvider } from "@/data/local/db-context";
+import * as schema from "@/data/local/schema";
+import { AuthProvider, useAuth } from "@/data/remote/auth-context";
 import { drizzle } from "drizzle-orm/expo-sqlite";
-import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { openDatabaseSync, SQLiteProvider } from "expo-sqlite";
 import { Suspense, useEffect } from "react";
+import { SheetProvider } from "react-native-actions-sheet";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ActivityIndicator, PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import migrations from "../drizzle/migrations";
 
 function RouteGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -33,7 +32,6 @@ export default function RootLayout() {
   const DATABASE_NAME = "workout.db"
   const expoDb = openDatabaseSync(DATABASE_NAME);
   const db = drizzle(expoDb, { schema });
-  const { success, error } = useMigrations(db, migrations);
 
   return (
     <Suspense fallback={<ActivityIndicator>Loading...</ActivityIndicator>}>
@@ -43,17 +41,19 @@ export default function RootLayout() {
         useSuspense>
         <DbProvider>
           <GestureHandlerRootView style={{ flex: 1 }}>
-            <AuthProvider>
-              <PaperProvider>
-                <SafeAreaProvider>
-                  <RouteGuard>
-                    <Stack>
-                      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                    </Stack>
-                  </RouteGuard>
-                </SafeAreaProvider>
-              </PaperProvider>
-            </AuthProvider>
+            <SheetProvider context="global">
+              <AuthProvider>
+                <PaperProvider>
+                  <SafeAreaProvider>
+                    <RouteGuard>
+                      <Stack>
+                        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                      </Stack>
+                    </RouteGuard>
+                  </SafeAreaProvider>
+                </PaperProvider>
+              </AuthProvider>
+            </SheetProvider>
           </GestureHandlerRootView>
         </DbProvider>
       </SQLiteProvider>

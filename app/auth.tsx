@@ -1,4 +1,4 @@
-import { useAuth } from '@/lib/auth-context';
+import { useAuth } from '@/data/remote/auth-context';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';

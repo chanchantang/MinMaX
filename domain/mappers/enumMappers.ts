@@ -1,4 +1,4 @@
-import { SyncStatus } from "./enum";
+import { SyncStatus } from "../enum";
 
 export function toSyncStatus(value: string): SyncStatus {
   if (!Object.values(SyncStatus).includes(value as SyncStatus)) {

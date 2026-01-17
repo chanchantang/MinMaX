@@ -26,9 +26,9 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
-        name="add-workout"
+        name="new-program"
         options={{
-          title: "Add Workout",
+          title: "New Program",
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="plus-circle" size={size} color={color} />
           )

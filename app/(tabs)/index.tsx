@@ -1,6 +1,6 @@
-import { WorkoutExercise } from "@/db/types";
-import { useAuth } from "@/lib/auth-context";
-import { removeExerciseFromWorkout } from "@/lib/workoutExerciseRepository";
+import { WorkoutExercise } from "@/data/local/types";
+import { useAuth } from "@/data/remote/auth-context";
+import { removeExerciseFromWorkout } from "@/data/remote/repositories/workoutExerciseRepository";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { MutableRefObject, useRef, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
@@ -68,13 +68,13 @@ export default function Index() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {exercises?.length !== 0 ? (
           exercises?.map((exercise, key) => {
-            if (!swipeableRefs.current[exercise.$id]) {
-              swipeableRefs.current[exercise.$id] = { current: null };
+            if (!swipeableRefs.current[exercise.id]) {
+              swipeableRefs.current[exercise.id] = { current: null };
             }
-            const refObject = swipeableRefs.current[exercise.$id];
+            const refObject = swipeableRefs.current[exercise.id];
             return (
               <Swipeable
-                key={exercise.$id}
+                key={exercise.id}
                 ref={refObject}
                 overshootLeft={false}
                 overshootRight={false}
@@ -82,11 +82,11 @@ export default function Index() {
                 renderRightActions={renderRightActions}
                 onSwipeableOpen={(direction) => {
                   if (direction === 'left') {
-                    handleDeleteExercise(exercise.$id);
+                    handleDeleteExercise(exercise.id);
                   } else if (direction === 'right') {
                     // Handle edit action
                   }
-                  swipeableRefs.current[exercise.$id].current?.close();
+                  swipeableRefs.current[exercise.id].current?.close();
                 }}
               >
                 <Surface style={styles.card} elevation={0}>
@@ -101,9 +101,6 @@ export default function Index() {
           <Text>No exercises found. Add one!</Text>
         ) }
       </ScrollView>
-
-
-
     </View>
   );
 }

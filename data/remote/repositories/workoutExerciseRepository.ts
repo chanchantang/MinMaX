@@ -1,10 +1,10 @@
 import { ID } from "react-native-appwrite";
-import { WorkoutExercise } from "../types/database.types";
 import {
-    appwriteDb,
-    DATABASE_ID,
-    WORKOUT_EXERCISE_TABLE_ID,
-} from "./appwrite";
+  appwriteDb,
+  DATABASE_ID,
+  WORKOUT_EXERCISE_TABLE_ID,
+} from "../client";
+import { WorkoutExercise } from "../types";
 
 /* =========================
    CREATE

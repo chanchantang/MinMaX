@@ -1,5 +1,5 @@
-import { Workout } from "../db/types";
-import { WorkoutModel } from "./models";
+import { Workout } from "../../data/local/types";
+import { WorkoutModel } from "../models";
 import { toSyncStatus } from "./enumMappers";
 
 export function workoutFromDb(row: Workout): WorkoutModel {

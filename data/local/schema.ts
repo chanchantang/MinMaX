@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { Equipment, ExerciseType, ExerciseUnit, MuscleGroup, SetType, SyncStatus } from "../domain/enum";
 import { enumToTuple } from "./enumUtils";
+import { Equipment, ExerciseType, ExerciseUnit, MuscleGroup, SetType, SyncStatus } from "../../domain/enum";
 /* =========================
   ENUM VALUES
   ========================= */

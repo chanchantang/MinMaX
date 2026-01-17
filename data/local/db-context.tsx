@@ -2,7 +2,8 @@ import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { useSQLiteContext } from "expo-sqlite";
 import React, { createContext, useContext, useEffect, useMemo } from "react";
-import { clearDb, setDb } from "./db-client";
+import { clearDb, setDb } from "./client";
+import { runSeedsIfNeeded } from "./seeds/runSeeds";
 
 const DbContext = createContext<ReturnType<typeof drizzle> | null>(null);
 
@@ -14,6 +15,10 @@ export function DbProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setDb(db);
+    async function init() {
+      await runSeedsIfNeeded();
+    }
+    init();
     return () => clearDb();
   }, [db]);
 

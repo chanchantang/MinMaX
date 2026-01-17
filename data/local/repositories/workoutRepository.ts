@@ -1,7 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 import { nanoid } from "nanoid/non-secure";
-import { SyncStatus } from "../../domain/enum";
-import { getDb } from "../db-client";
+import { SyncStatus } from "../../../domain/enum";
+import { getDb } from "../client";
 import { workouts } from "../schema";
 
 export function generateId() {
